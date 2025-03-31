@@ -1,6 +1,6 @@
 from flask import Flask
 
-from app.api.endpoints import chat
+from app.api.endpoints import chat, search
 
 app = Flask(__name__)
 
@@ -12,6 +12,7 @@ def home():
 
 def create_app():
     app.register_blueprint(chat.bp)
+    app.register_blueprint(search.bp)
     return app
 
 
