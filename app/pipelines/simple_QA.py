@@ -1,15 +1,13 @@
-from pymilvus import Collection
+from pymilvus import Collection, connections
 from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Optional
+import configparser
 
 class MilvusSearcher:
     def __init__(
             self,
             collection_name: str = "java_interview_qa",
             embedding_model_name: str = "paraphrase-MiniLM-L6-v2",
-            host: str = "172.29.4.151",
-            port: str = "19530",
-            db_name: str = "Java_knowledge_base"
     ):
         """
         初始化Milvus搜索器
@@ -17,29 +15,28 @@ class MilvusSearcher:
         参数:
             collection_name: 集合名称
             embedding_model_name: 嵌入模型名称或路径
-            host: Milvus服务器地址
-            port: Milvus服务器端口
+            uri: Milvus服务器地址
+            token: Milvus服务器令牌
             db_name: 数据库名称
         """
+        cfp = configparser.ConfigParser()
+        cfp.read("../config/milvus_config.ini")
         self.collection_name = collection_name
         self.embedding_model_name = embedding_model_name
-
+        self.milvus_uri = cfp.get("milvus", "uri")
+        self.token = cfp.get("milvus", "token")
         # 连接设置
-        self._connect_to_milvus(host, port, db_name)
+        self._connect_to_milvus()
         self._load_embedding_model()
         self._load_collection()
 
-    def _connect_to_milvus(self, host: str, port: str, db_name: str):
+    def _connect_to_milvus(self):
         """连接到Milvus服务器"""
         try:
-            from pymilvus import connections
             connections.connect(
-                alias="default",
-                host=host,
-                port=port,
-                db_name=db_name
+                uri=self.milvus_uri,
+                token=self.token,
             )
-            print(f"成功连接到Milvus: {host}:{port}/{db_name}")
         except Exception as e:
             print(f"连接Milvus失败: {e}")
             raise

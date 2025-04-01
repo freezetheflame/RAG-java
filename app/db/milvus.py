@@ -1,11 +1,14 @@
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
+import configparser
 
 
 class MilvusDBInitializer:
-    def __init__(self, host: str = '172.29.4.151', port: str = '19530'):
-        self.host = host  # Milvus 服务器地址
-        self.port = port  # Milvus 服务器端口
-        self.db_name = 'Java_knowledge_base'
+
+    def __init__(self):
+        cfp = configparser.ConfigParser()
+        cfp.read("../config/milvus_config.ini")
+        self.milvus_uri = cfp.get("milvus", "uri")
+        self.token = cfp.get("milvus", "token")
         self.collection_name = "java_interview_qa"  # 默认集合名称
         self.dim = 384  # 与嵌入模型维度匹配
         self.connect()
@@ -13,8 +16,8 @@ class MilvusDBInitializer:
     def connect(self):
         """连接到 Milvus 服务器"""
         try:
-            connections.connect(alias="default",host=self.host, port=self.port, db_name=self.db_name)
-            print(f"Connected to Milvus at {self.host}:{self.port}:{self.db_name}")
+            connections.connect(uri=self.milvus_uri, token=self.token)
+            print(f"Connected to Milvus at {self.milvus_uri}")
         except Exception as e:
             print(f"Failed to connect to Milvus: {e}")
 
@@ -56,6 +59,7 @@ class MilvusDBInitializer:
         """关闭连接"""
         connections.disconnect("default")
         print("ℹ️ Milvus连接已关闭")
+
 
 if __name__ == '__main__':
     db_initializer = MilvusDBInitializer()

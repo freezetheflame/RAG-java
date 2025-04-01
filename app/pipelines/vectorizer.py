@@ -1,11 +1,11 @@
 from sentence_transformers import SentenceTransformer
 from pymilvus import Collection, connections
 from typing import List, Dict, Any
+import configparser
 
 
 class MilvusEmbeddingProcessor:
-    def __init__(self, host: str = '172.29.4.151', port: str = '19530',
-                 db_name: str = 'Java_knowledge_base',
+    def __init__(self,
                  collection_name: str = "java_interview_qa",
                  embedding_model_name: str = 'paraphrase-MiniLM-L6-v2'):
         """
@@ -18,9 +18,10 @@ class MilvusEmbeddingProcessor:
             collection_name: 集合名称
             embedding_model_name: 嵌入模型名称
         """
-        self.host = host
-        self.port = port
-        self.db_name = db_name
+        cfp = configparser.ConfigParser()
+        cfp.read("../config/milvus_config.ini")
+        self.milvus_uri = cfp.get('milvus', 'uri')
+        self.token = cfp.get('milvus', 'token')
         self.collection_name = collection_name
         self.embedding_model_name = embedding_model_name
 
@@ -34,12 +35,9 @@ class MilvusEmbeddingProcessor:
         """连接到Milvus服务器"""
         try:
             connections.connect(
-                alias="default",
-                host=self.host,
-                port=self.port,
-                db_name=self.db_name
+                uri=self.milvus_uri,
+                token=self.token
             )
-            print(f"已连接到Milvus: {self.host}:{self.port}/{self.db_name}")
         except Exception as e:
             print(f"连接Milvus失败: {e}")
             raise
