@@ -46,7 +46,11 @@ backend/
 │   ├── services/           # 业务逻辑层
 │   │   ├── __init__.py
 │   │   ├── knowledge_base.py  # 知识库服务
-│   │   └── llm.py          # LLM集成
+│   │   └── llm       # LLM集成
+│   │       ├── __init__.py
+│   │       ├── factory.py  # LLM工厂
+│   │       ├── ollama.py   # Ollama接口
+│   │       └── deepseek.py # DeepSeek接口
 │   └── main.py             # 应用入口
 ├── tests/                  # 测试用例
 │   ├── __init__.py

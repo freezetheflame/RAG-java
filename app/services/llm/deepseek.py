@@ -11,7 +11,6 @@ API_URL = 'https://api.deepseek.com/v1'
 class deepseekService(LLMService):
     def __init__(self):
         self.api_key = Settings.DEEPSEEK_API_KEY
-        print(self.api_key)
         self.client = AsyncOpenAI(api_key=self.api_key,base_url=API_URL)
 
     def generate(self, prompt: str, **kwargs) -> str:
@@ -19,6 +18,7 @@ class deepseekService(LLMService):
         return asyncio.run(self.agenerate(prompt, **kwargs))
 
     async def agenerate(self, prompt: str, **kwargs) -> str:
+        print("---------llm is generating response--------")
         response = await self.client.chat.completions.create(
             model = 'deepseek-chat',
             messages=[{
