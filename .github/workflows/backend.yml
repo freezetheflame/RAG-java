@@ -49,6 +49,7 @@ jobs:
         )
         print('✅ Milvus版本:', utility.get_server_version())
         "
-    - name: Run main application
-      run: python -m app.main
-      timeout-minutes: 5
+    - name: Run and auto-terminate
+      run: |
+          echo "启动测试运行（5分钟后自动终止）..."
+          timeout 300 python -m app.main
