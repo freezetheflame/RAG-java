@@ -7,43 +7,13 @@ on:
     branches: [master]
 
 env:
-  MILVUS_HOST: localhost
-  MILVUS_PORT: 19530
-  FLASK_ENV: development
+  # 云端Milvus配置（通过Secrets注入）
+  MILVUS_CLOUD_URI: ${{ secrets.MILVUS_URL}}  # 格式: https://xxx.api.milvus.cloud
+  MILVUS_CLOUD_TOKEN: ${{ secrets.MILVUS_TOKEN }}
 
 jobs:
   service-validation:
     runs-on: ubuntu-latest
-    services:
-      etcd:
-        image: quay.io/coreos/etcd:v3.5.18
-        ports:
-          - 2379:2379
-        options: >-
-          --health-cmd "etcdctl endpoint health"
-          --health-interval 30s
-
-      minio:
-        image: minio/minio:RELEASE.2023-03-20T20-16-18Z
-        ports:
-          - 9000:9000
-          - 9001:9001
-        env:
-          MINIO_ACCESS_KEY: minioadmin
-          MINIO_SECRET_KEY: minioadmin
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live"
-
-      milvus:
-        image: milvusdb/milvus:v2.5.5
-        ports:
-          - 19530:19530
-          - 9091:9091
-        env:
-          ETCD_ENDPOINTS: etcd:2379
-          MINIO_ADDRESS: minio:9000
-        options: >-
-          --health-cmd "curl -f http://localhost:9091/healthz"
 
     steps:
     - name: Checkout code
@@ -61,14 +31,16 @@ jobs:
 
     - name: Verify Milvus connection
       run: |
-        echo "等待Milvus启动..."
-        timeout 120 bash -c 'until curl -s http://localhost:9091/healthz | grep "OK"; do
-          sleep 10
-        done'
-        echo "Milvus已就绪！"
+        python -c "
+        import os, pymilvus
+        from pymilvus import connections, utility
+        connections.connect(
+            uri=os.getenv('MILVUS_CLOUD_URI'),
+            token=os.getenv('MILVUS_CLOUD_TOKEN')
+        )
+        print('✅ Milvus版本:', utility.get_server_version())
+        "
 
     - name: Run main application
-      run: |
-        echo "启动主程序..."
-        python main.py --validate-only
+      run: python main.py --validate-only
       timeout-minutes: 5
