@@ -2,9 +2,9 @@ name: Java Knowledge Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 env:
   MILVUS_HOST: localhost  # GitHub Actions服务间通信使用localhost
