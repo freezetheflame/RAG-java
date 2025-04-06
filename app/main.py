@@ -1,3 +1,6 @@
+import os
+import signal
+
 from flask import Flask
 
 from app.api.endpoints import chat, search

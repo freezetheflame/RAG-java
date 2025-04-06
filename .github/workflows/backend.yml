@@ -52,4 +52,8 @@ jobs:
     - name: Run and auto-terminate
       run: |
           echo "启动测试运行（5分钟后自动终止）..."
-          timeout 300 python -m app.main
+          python -m app.main & echo $! > flask.pid
+
+    - name: Stop Flask app
+      run: |
+        kill $(cat flask.pid)
