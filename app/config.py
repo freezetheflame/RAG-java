@@ -12,3 +12,5 @@ config = Config(RepositoryEnv(env_path))
 class Settings:
     DEEPSEEK_API_KEY = config('DEEPSEEK_API_KEY')
     MILVUS_HOST = config('MILVUS_HOST')
+    MILVUS_URL = config('MILVUS_URL')
+    MILVUS_TOKEN = config('MILVUS_TOKEN')

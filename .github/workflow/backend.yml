@@ -1,0 +1,73 @@
+name: Java Knowledge Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  MILVUS_HOST: localhost  # GitHub Actions服务间通信使用localhost
+  MILVUS_PORT: 19530
+  FLASK_ENV: development
+
+jobs:
+  service-validation:
+    runs-on: ubuntu-latest
+    services:
+      etcd:
+        image: quay.io/coreos/etcd:v3.5.18
+        ports: [2379:2379]
+        options: >-
+          --health-cmd "etcdctl endpoint health"
+          --health-interval 30s
+
+      minio:
+        image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+        ports: [9000:9000, 9001:9001]
+        env:
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+
+      milvus:
+        image: milvusdb/milvus:v2.5.5
+        ports: [19530:19530, 9091:9091]
+        env:
+          ETCD_ENDPOINTS: etcd:2379
+          MINIO_ADDRESS: minio:9000
+        options: >-
+          --health-cmd "curl -f http://localhost:9091/healthz"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Verify Milvus connection
+      run: |
+        echo "等待Milvus启动..."
+        timeout 120s bash -c 'until curl -s http://localhost:9091/healthz | grep "OK"; do
+          sleep 10
+        done'
+        echo "Milvus已就绪！"
+
+    - name: Run main application
+      run: |
+        echo "启动主程序..."
+        python main.py --validate-only  # 假设你的主程序有快速验证模式
+        # 或者直接运行（根据实际情况调整）
+        # nohup python main.py > app.log 2>&1 &
+        # sleep 30  # 等待应用启动
+        # curl -s http://localhost:{你的应用端口}/healthcheck
+      timeout-minutes: 5

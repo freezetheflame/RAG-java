@@ -1,5 +1,6 @@
+from flask import current_app
+
 from app.api.dependency import get_llm_service_dependency
-from app.db.milvus_client import MilvusClient
 from app.services.llm import LLMService
 from app.utils.tokenizer import Tokenizer
 
@@ -7,7 +8,7 @@ from app.utils.tokenizer import Tokenizer
 class RAGService:
     def __init__(self,LLMrequire:str = 'deepseek'):
         self.tokenizer = Tokenizer()
-        self.milvus_client = MilvusClient()
+        self.milvus_client = current_app.extensions['milvus']  # 获取 Milvus 客户端
         self.LLMService = LLMrequire
         self.llm_service = get_llm_service_dependency(LLMrequire)  # 初始化 LLM 服务
 
@@ -16,7 +17,7 @@ class RAGService:
         query_vector = self.tokenizer.encode(query)
 
         # 2. 在 Milvus 中检索
-        results = self.milvus_client.search(query_vector, top_k=top_k)
+        results = self.milvus_client.search(query_vector=query_vector, top_k=top_k)
         print("----------retrieve results:",results)
         # 3. 解析结果
         retrieved_docs = []
