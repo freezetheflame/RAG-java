@@ -42,5 +42,5 @@ jobs:
         "
 
     - name: Run main application
-      run: python main.py --validate-only
+      run: python app/main.py --validate-only
       timeout-minutes: 5
