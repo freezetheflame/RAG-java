@@ -24,11 +24,20 @@ jobs:
       with:
         python-version: "3.10"
 
+    - name: Create .env file
+      run: |
+        cat << EOF > .env
+        DEEPSEEK_API_KEY = ${{secrets.DEEPSEEK_API_KEY}}
+        DEEPSEEK_URL = ${{secrets.DEEPSEEK_URL}}
+        MILVUS_HOST = ${{secrets.MILVUS_HOST}}
+        MILVUS_URL = ${{secrets.MILVUS_URL}}
+        MILVUS_TOKEN = ${{secrets.MILVUS_TOKEN}}
+        EOF
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-
     - name: Verify Milvus connection
       run: |
         python -c "
@@ -40,7 +49,6 @@ jobs:
         )
         print('✅ Milvus版本:', utility.get_server_version())
         "
-
     - name: Run main application
       run: python -m app.main
       timeout-minutes: 5
