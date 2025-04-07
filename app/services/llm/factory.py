@@ -7,6 +7,7 @@ from app.services.llm.ollama import OllamaService
 LLM_PROVIDERS = {
     "deepseek": deepseekService,
     "ollama": OllamaService
+
 }
 
 def get_llm_service(provider:str) -> LLMService:

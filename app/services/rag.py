@@ -34,7 +34,6 @@ class RAGService:
         # 1. 拼接检索到的文档片段
         context = "\n".join([doc["question"] + "\n" + doc["answer"] for doc in retrieved_docs])
 
-
         # 2. 构造提示
         prompt = f"""
         根据以下上下文回答问题：

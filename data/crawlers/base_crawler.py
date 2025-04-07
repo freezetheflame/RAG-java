@@ -19,7 +19,7 @@ class BaseCrawler:
         return f"{datetime.now().strftime('%Y%m%d')}_{name}.md"
 
     def fetch_to_markdown(self, url, selector="main"):
-        """获取网页并转换为Markdown"""
+        """获取网页并转换为Markdown，返回标题、内容和子链接"""
         try:
             response = requests.get(url, timeout=10)
             response.raise_for_status()
@@ -27,16 +27,22 @@ class BaseCrawler:
             soup = BeautifulSoup(response.text, 'html.parser')
             content = soup.select_one(selector) or soup.body
 
-            # 转换相对链接为绝对链接
-            for a in content.find_all('a', href=True):
-                a['href'] = urljoin(url, a['href'])
+            # 提取页面标题
+            title = soup.title.string.strip() if soup.title else url
 
-            return markdownify(str(content))
+            # 转换相对链接为绝对链接并收集
+            links = []
+            for a in content.find_all('a', href=True):
+                absolute_url = urljoin(url, a['href'])
+                a['href'] = absolute_url
+                links.append(absolute_url)
+
+            return title, markdownify(str(content)), links
         except Exception as e:
             print(f"Error fetching {url}: {str(e)}")
-            return None
+            return None, None, []
 
-    def save_content(self, title, content):
+    def save_content(self, title, content, source_url):
         """保存Markdown文件"""
         if not content:
             return False
@@ -44,6 +50,6 @@ class BaseCrawler:
         filename = os.path.join(self.output_dir, self.sanitize_filename(title))
         with open(filename, 'w', encoding='utf-8') as f:
             f.write(f"# {title}\n\n")
-            f.write(f"Source: {self.base_url}\n\n")
+            f.write(f"Source: {source_url}\n\n")
             f.write(content)
         return True

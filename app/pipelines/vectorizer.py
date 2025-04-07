@@ -192,6 +192,7 @@ class MilvusEmbeddingProcessor:
 
 # 示例用法
 if __name__ == "__main__":
+
     # 示例数据
     sample_questions = [
         "什么是Java中的多态性？",

@@ -16,7 +16,7 @@ async def search():
             return jsonify({"error": "Missing 'query' in request body"}), 400
 
         # 2. 初始化 RAG 服务
-        rag_service = RAGService()
+        rag_service = RAGService(LLMrequire='deepseek')
 
         # 3. 执行 RAG 查询
         result = await rag_service.query(query, top_k=top_k)

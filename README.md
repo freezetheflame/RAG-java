@@ -28,12 +28,10 @@ backend/
 │   │       ├── __init__.py
 │   │       ├── hybrid.py   # 混合检索
 │   │       ├── rerank.py   # 结果重排序
-│   │       └── cache.py    # 缓存策略
 │   ├── db/                 # 数据库层
 │   │   ├── __init__.py
 │   │   ├── postgres.py     # PostgreSQL操作
 │   │   ├── milvus.py       # Milvus向量操作
-│   │   └── redis.py        # Redis缓存
 │   ├── models/             # 数据模型
 │   │   ├── __init__.py
 │   │   ├── document.py     # 文档模型
@@ -58,5 +56,5 @@ backend/
 │   └── test_document.py
 ├── requirements.txt        # 依赖清单
 ├── Dockerfile              # 容器化配置
-└── alembic/                # 数据库迁移
+
 ```
