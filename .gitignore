@@ -1,3 +1,5 @@
 tutorial/
 .env
 .idea
+data/data
+app/hfmodels
