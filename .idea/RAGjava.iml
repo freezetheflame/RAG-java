@@ -6,6 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/app/hfmodels/Helsinki-NLP/.cache/huggingface/download" />
       <excludeFolder url="file://$MODULE_DIR$/data/data" />
       <excludeFolder url="file://$MODULE_DIR$/tutorial" />
+      <excludeFolder url="file://$MODULE_DIR$/data/crawlers/data" />
     </content>
     <orderEntry type="jdk" jdkName="RAGjava" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -3,3 +3,4 @@ tutorial/
 .idea
 data/data
 app/hfmodels
+data/crawlers/data
