@@ -11,4 +11,7 @@
     <orderEntry type="jdk" jdkName="RAGjava" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="PackageRequirementsSettings">
+    <option name="removeUnused" value="true" />
+  </component>
 </module>
