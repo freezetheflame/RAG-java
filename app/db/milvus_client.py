@@ -5,14 +5,14 @@ from app.config import Settings
 
 
 class MilvusClient:
-    def __init__(self, port: str = '19530',app=None):
+    def __init__(self, port: str = '19530',app=None,collection_name = "java_interview_qa",dim=384):
         self.host = Settings.MILVUS_HOST # Milvus 服务器地址
         self.port = port  # Milvus 服务器端口
         self.db_name = 'Java_knowledge_base'
         self.token = Settings.MILVUS_TOKEN
         self.uri = Settings.MILVUS_URL
-        self.collection_name = "java_interview_qa"  # 默认集合名称
-        self.dim = 384  # 与嵌入模型维度匹配
+        self.collection_name = collection_name  # 默认集合名称
+        self.dim = dim  # 与嵌入模型维度匹配
         self.app = app
         if app is not None:
             self.connect(app)
