@@ -33,7 +33,7 @@ jobs:
         MILVUS_URL = ${{secrets.MILVUS_URL}}
         MILVUS_TOKEN = ${{secrets.MILVUS_TOKEN}}
         ACCESS_KEY_ID = ${{secrets.ACCESS_KEY_ID}}
-        ACCESS_KEY_SECRETS = ${{secrets.ACCESS_KEY_SECRET}}
+        ACCESS_KEY_SECRET = ${{secrets.ACCESS_KEY_SECRET}}
         ENDPOINT_URL = ${{secrets.ENDPOINT_URL}}
         EOF
 
