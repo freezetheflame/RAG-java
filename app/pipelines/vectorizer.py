@@ -7,7 +7,7 @@ import configparser
 class MilvusEmbeddingProcessor:
     def __init__(self,
                  collection_name: str = "java_interview_qa",
-                 embedding_model_name: str = 'paraphrase-MiniLM-L6-v2'):
+                 embedding_model_name: str = 'sentence-transformers/paraphrase-MiniLM-L6-v2'):
         """
         初始化Milvus嵌入处理器
 
@@ -29,7 +29,7 @@ class MilvusEmbeddingProcessor:
         self._connect_to_milvus()
 
         # 加载嵌入模型
-        self.embedding_model = SentenceTransformer('sentence-transformers/paraphrase-MiniLM-L6-v2')
+        self.embedding_model = SentenceTransformer(embedding_model_name)
 
     def _connect_to_milvus(self):
         """连接到Milvus服务器"""
