@@ -67,7 +67,7 @@ class AdvancedChunker(RecursiveCharacterTextSplitter):
         # 使用Unstructured提取PDF元素（文本+表格+图片描述）
         elements = partition_pdf(
             filename=file_path,
-            strategy="fast",  # 高精度模式
+            strategy="fast",  # fast
             extract_images_in_pdf=False,
             infer_table_structure=True,
             include_page_breaks=True,
