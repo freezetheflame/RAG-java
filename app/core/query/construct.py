@@ -3,7 +3,7 @@ from .query_routing.router_strategy import RouterStrategy
 from .query_translation.marianmt_adapter import MarianMTTranslator
 
 
-class RAGPipeline:
+class QueryPipeline:
     def __init__(self):
         self.query_factory = QueryFactory()
         self.router_strategy = RouterStrategy()
@@ -11,7 +11,7 @@ class RAGPipeline:
 
     def process(self, user_query: str, lang: str = "en"):
         # 1. Query Construction
-        intent_constructor = self.query_factory.get_constructor("intent")
+        intent_constructor = self.query_factory.get_constructor("entity")
         query_context = intent_constructor.build(user_query)
 
         # 2. Translation (示例：中文→英文)

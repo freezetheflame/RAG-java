@@ -31,13 +31,13 @@ class ProcessingPipeline:
         print("-------------chunking ready-------------")
         # 并行分词
         tokenized_chunks = [self._process_chunk(chunk) for chunk in chunks]
-        print("--------------token ready---------------")
+        print("--------------token and embedding ready---------------")
         #添加chunk元数据
         for idx, chunk in enumerate(tokenized_chunks):
             chunk.update({
                 "file_name": self.process_file_path(file_path),
                 "chunk_index": idx,
-                "token_count": len(chunk["tokens"])
+                # "token_count": len(chunk["tokens"])
             })
 
         self.VectorDB.add_documents(tokenized_chunks)
@@ -48,7 +48,7 @@ class ProcessingPipeline:
         """单个分块处理"""
         return {
             "raw_text": chunk,
-            "tokens": self.tokenizer.tokenize(chunk),
+            # "tokens": self.tokenizer.tokenize(chunk),
             "vector": self.embedding.generate(chunk),
             "keywords": self.tokenizer.extract_keywords(chunk)
         }

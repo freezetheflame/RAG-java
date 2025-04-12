@@ -1,6 +1,7 @@
 from .base import QueryConstructor
 from .intent_classifier import IntentClassifier
-from .entity_expander import EntityExpander
+from .entity_expander import EntityExpander, load_synonyms
+
 
 class QueryFactory:
     @staticmethod
@@ -8,7 +9,7 @@ class QueryFactory:
         if strategy == "intent":
             return IntentClassifier()
         elif strategy == "entity":
-            return EntityExpander()
+            return EntityExpander(load_synonyms("app/core/query/query_construction/java_synonyms.txt"))
         # 可扩展其他策略
         else:
             raise ValueError("Unknown strategy")
