@@ -1,0 +1,28 @@
+import oss2
+from app.config import Settings
+
+
+class DocToOSS:
+    def __init__(self, bucket_name : str = 'rag-java'):
+        self.ACCESS_KEY_ID = Settings.ACCESS_KEY_ID
+        self.ACCESS_KEY_SECRET = Settings.ACCESS_KEY_SECRET
+        self.ENDPOINT_URL = Settings.ENDPOINT_URL
+        self.bucket_name = bucket_name
+
+
+    def get_file(self, file_name):
+            auth = oss2.Auth(self.ACCESS_KEY_ID, self.ACCESS_KEY_SECRET)
+            bucket = oss2.Bucket(auth, self.ENDPOINT_URL, self.bucket_name)
+            file_path =  file_name
+
+            # 设置过期时间
+            expiry_seconds = 3600
+
+            url = bucket.sign_url('GET', file_path, expiry_seconds)
+            print("临时访问链接:", url)
+
+
+
+if __name__ == '__main__':
+    doc_to_oss = DocToOSS()
+    doc_to_oss.get_file('Bug.pdf')

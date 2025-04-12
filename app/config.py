@@ -14,3 +14,6 @@ class Settings:
     MILVUS_HOST = config('MILVUS_HOST')
     MILVUS_URL = config('MILVUS_URL')
     MILVUS_TOKEN = config('MILVUS_TOKEN')
+    ACCESS_KEY_ID = config('ACCESS_KEY_ID')
+    ACCESS_KEY_SECRET = config('ACCESS_KEY_SECRET')
+    ENDPOINT_URL = config('ENDPOINT_URL')
