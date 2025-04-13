@@ -8,9 +8,10 @@ class AdvancedChunker(RecursiveCharacterTextSplitter):
         self.min_chunk_size = 300
         # 初始化分块器（针对中文优化）
         super().__init__(
-            chunk_size=500,
+            chunk_size=1000,
             chunk_overlap=80,
             separators= self.get_dynamic_separators(),
+            length_function=len,
             # ["\n## ", "\n### ", "\n\n", "\n", "。", "！", "？", "……"]
         )
 
@@ -22,10 +23,10 @@ class AdvancedChunker(RecursiveCharacterTextSplitter):
         return base_separators
 
     def split_text(self, text):
-        # 预处理：合并过短段落
-        text = self._preprocess_text(text)
+        # no预处理：合并过短段落
+        # text = self._preprocess_text(text)
         chunks = super().split_text(text)
-        return self._postprocess_chunks(chunks)
+        return chunks
 
 
     def _preprocess_text(self, text):

@@ -26,7 +26,7 @@ class DocumentModel:
         {
             "name": "content",
             "dtype": DataType.VARCHAR,
-            "max_length": 2000
+            "max_length": 30000
         },
         {
             "name": "file_name",
@@ -40,7 +40,7 @@ class DocumentModel:
         {
             "name": "keywords",
             "dtype": DataType.VARCHAR,
-            "max_length": 1000  # 逗号分隔的关键词
+            "max_length": 10000  # 逗号分隔的关键词
         }
     ]
 

@@ -9,7 +9,7 @@ from data.build.chunk import AdvancedChunker
 def validate_chunk(chunk):
     """分块质量验证规则"""
     # 长度校验（按字符数）
-    assert 280 <= len(chunk) <= 600, f"分块长度异常: {len(chunk)}"
+    assert 600 <= len(chunk) <= 1500, f"分块长度异常: {len(chunk)}"
 
     # 完整性校验（检查截断）
     forbidden_patterns = [
@@ -32,7 +32,7 @@ def validate_chunk(chunk):
 
 @pytest.fixture
 def sample_pdf():
-    return "../data/中文.pdf"
+    return "../data/分布式面试资料.pdf"
 
 
 @pytest.fixture

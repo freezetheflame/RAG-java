@@ -1,3 +1,5 @@
+import os
+
 import oss2
 from app.config import Settings
 
@@ -21,6 +23,11 @@ class DocToOSS:
             url = bucket.sign_url('GET', file_path, expiry_seconds)
             print("临时访问链接:", url)
 
+    def upload_file(self,file_path):
+        auth = oss2.Auth(self.ACCESS_KEY_ID, self.ACCESS_KEY_SECRET)
+        bucket = oss2.Bucket(auth, self.ENDPOINT_URL, self.bucket_name)
+        bucket.put_object_from_file(os.path.basename(file_path), file_path)
+        print(f"文件 {file_path} 上传成功")
 
 
 if __name__ == '__main__':
