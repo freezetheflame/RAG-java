@@ -24,7 +24,7 @@ class AdvancedChunker(RecursiveCharacterTextSplitter):
 
     def split_text(self, text):
         # no预处理：合并过短段落
-        # text = self._preprocess_text(text)
+        text = self._preprocess_text(text)
         chunks = super().split_text(text)
         return chunks
 
