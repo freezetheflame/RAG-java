@@ -79,6 +79,8 @@ class AdvancedChunker(RecursiveCharacterTextSplitter):
 
         # 分块处理
         chunks = self.split_text(text_content)
+        if(chunks.__len__() == 0):
+            raise ValueError("分块失败，请检查PDF内容")
         return chunks
 
     # chunk.py 更新后的 process_markdown 方法
