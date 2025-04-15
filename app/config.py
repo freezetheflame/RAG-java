@@ -17,3 +17,4 @@ class Settings:
     ACCESS_KEY_ID = config('ACCESS_KEY_ID')
     ACCESS_KEY_SECRET = config('ACCESS_KEY_SECRET')
     ENDPOINT_URL = config('ENDPOINT_URL')
+    HUNYUAN_API_KEY = config('HUNYUAN_API_KEY')

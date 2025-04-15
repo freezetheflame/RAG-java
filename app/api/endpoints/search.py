@@ -16,7 +16,7 @@ async def search():
             return jsonify({"error": "Missing 'query' in request body"}), 400
 
         # 2. 初始化 RAG 服务
-        rag_service = RAGService(LLMrequire='deepseek')
+        rag_service = RAGService(LLMrequire='hunyuan')
 
         # 3. 执行 RAG 查询
         result = await rag_service.query(query, top_k=top_k)
@@ -31,7 +31,7 @@ async def search():
         # 捕获异常并返回错误信息
         return jsonify({"error": str(e)}), 500
 
-@bp.route('hybrid_search', methods=['POST'])
+@bp.route('/hybrid_search', methods=['POST'])
 async def hybrid_search():
     try:
         # 1. 解析请求数据
