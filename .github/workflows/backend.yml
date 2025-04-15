@@ -35,6 +35,7 @@ jobs:
         ACCESS_KEY_ID = ${{secrets.ACCESS_KEY_ID}}
         ACCESS_KEY_SECRET = ${{secrets.ACCESS_KEY_SECRET}}
         ENDPOINT_URL = ${{secrets.ENDPOINT_URL}}
+        HUNYUAN_API_KEY = ${{secrets.HUNYUAN_API_KEY}}
         EOF
 
     - name: Install dependencies
