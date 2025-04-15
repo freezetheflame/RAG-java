@@ -82,3 +82,4 @@ class RAGService:
         return retrieved_docs
 
     async def hybrid_search(self, query: str, top_k=5, keywords: list = None):
+        pass
