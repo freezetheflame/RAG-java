@@ -32,4 +32,4 @@ class DocToOSS:
 
 if __name__ == '__main__':
     doc_to_oss = DocToOSS()
-    doc_to_oss.get_file('Bug.pdf')
+    doc_to_oss.get_file('Spring Boot教程.pdf')

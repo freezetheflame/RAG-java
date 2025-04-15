@@ -42,11 +42,24 @@ class MilvusClient:
         print(f"query_vector: {query_vector}")
         results = self.collection.search(
             data=[query_vector],
-            anns_field="question_vector",
+            anns_field="embedding",
             param=search_params,
             limit=top_k,
-            output_fields=["question", "answer"]
+            output_fields=["content","file_name"],
         )
         return results
 
-milvus_client = MilvusClient()
+    def hybrid_search(self,query_vector,keywords, top_k=5):
+        search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
+        print(f"query_vector: {query_vector}")
+        results = self.collection.search(
+            data=[query_vector],
+            anns_field="embedding",
+            param=search_params,
+            limit=top_k,
+            output_fields=["content","file_name"],
+            expr=f"keywords in {keywords}"
+        )
+        return results
+
+milvus_client = MilvusClient(collection_name="java_docs",dim=512)
