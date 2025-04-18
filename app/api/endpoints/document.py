@@ -1,4 +1,5 @@
 from flask import jsonify, Blueprint
+from flask import Response
 
 from app.db.doc_to_oss import DocToOSS
 
@@ -14,6 +15,13 @@ async def get_document(name):
     ossService = DocToOSS()
     try:
         file_url = ossService.get_file(name)
-        return jsonify({"file_url": file_url}), 200
+
+        response = Response(
+            file_url,
+            status=200,
+            mimetype='application/pdf'
+        )
+        response.headers['Content-Disposition'] = 'inline; filename="%s"' % name
+        return response
     except Exception as e:
         return jsonify({"error": str(e)}), 500
