@@ -9,7 +9,7 @@ bp = Blueprint('document', __name__)
 method: GET
 content: return the file by name from oss
 '''
-@bp.route('/document/{name}',methods=['GET'])
+@bp.route('/document/<name>',methods=['GET'])
 async def get_document(name):
     ossService = DocToOSS()
     try:
