@@ -21,7 +21,7 @@ class DocToOSS:
             expiry_seconds = 3600
 
             url = bucket.sign_url('GET', file_path, expiry_seconds)
-            print("临时访问链接:", url)
+            return url
 
     def upload_file(self,file_path):
         auth = oss2.Auth(self.ACCESS_KEY_ID, self.ACCESS_KEY_SECRET)
@@ -32,4 +32,5 @@ class DocToOSS:
 
 if __name__ == '__main__':
     doc_to_oss = DocToOSS()
-    doc_to_oss.get_file('Spring Boot教程.pdf')
+    url = doc_to_oss.get_file('Bug.pdf')
+    print(url)
