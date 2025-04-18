@@ -78,12 +78,26 @@ class AdvancedChunker(RecursiveCharacterTextSplitter):
             infer_table_structure=True,
             include_page_breaks=True,
         )
-
+        is_un = True
         if(elements.__len__() == 0):
-            raise ValueError("PDF内容为空，请检查PDF文件")
+            print("using other method to extract pdf")
+            # 处理PDF文件
+            from PyPDF2 import PdfReader
+            reader = PdfReader(file_path)
+            elements = []
+            is_un = False
+            #按照text属性提取文本
+            for page in reader.pages:
+                text = page.extract_text()
+                if text:
+                    elements.append(text)
+
 
         # 提取纯文本内容
-        text_content = "\n".join([e.text for e in elements if hasattr(e, 'text')])
+        if(is_un):
+            text_content = "\n".join([e.text for e in elements if hasattr(e, 'text')])
+        else:
+            text_content = "\n".join(elements)
         if(text_content.__len__() == 0):
             raise ValueError("PDF内容为空，请检查PDF文件")
         # 分块处理

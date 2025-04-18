@@ -1,5 +1,7 @@
+from PyPDF2 import PdfReader
 from unstructured.partition.pdf import partition_pdf
 
+file_path = "../data/ComputerArchitecture.pdf"
 
 def main():
     # 读取PDF文件
@@ -17,5 +19,14 @@ def main():
     print(text)
     print("end")
 
+def hard_read():
+    reader = PdfReader(file_path)
+    elements = []
+    for page in reader.pages:
+        text = page.extract_text()
+        if text:
+            elements.append(text)
+    print(elements)
+
 if __name__ == "__main__":
-    main()
+    hard_read()
