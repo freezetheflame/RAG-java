@@ -66,22 +66,21 @@ class AdvancedChunker(RecursiveCharacterTextSplitter):
 
     def process_pdf(self, file_path):
         # 使用Unstructured提取PDF元素（文本+表格+图片描述）
-        elements = partition_pdf(
-            filename=file_path,
-            strategy="fast",  # fast
-            extract_images_in_pdf=False,
-            infer_table_structure=True,
-            include_page_breaks=True,
-        )
+            elements = partition_pdf(
+                filename=file_path,
+                strategy="fast",  # fast
+                extract_images_in_pdf=False,
+                infer_table_structure=True,
+                include_page_breaks=True,
+            )
+            # 提取纯文本内容
+            text_content = "\n".join([e.text for e in elements if hasattr(e, 'text')])
 
-        # 提取纯文本内容
-        text_content = "\n".join([e.text for e in elements if hasattr(e, 'text')])
-
-        # 分块处理
-        chunks = self.split_text(text_content)
-        if(chunks.__len__() == 0):
-            raise ValueError("分块失败，请检查PDF内容")
-        return chunks
+            # 分块处理
+            chunks = self.split_text(text_content)
+            if chunks.__len__() == 0:
+                raise ValueError("分块失败，请检查PDF内容")
+            return chunks
 
     # chunk.py 更新后的 process_markdown 方法
     def process_markdown(self, file_path):

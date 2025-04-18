@@ -9,7 +9,7 @@ from data.build.pipeline import ProcessingPipeline
 
 @pytest.fixture
 def sample_pdf():
-    return "../data/cur.pdf"
+    return "../source/Bug.pdf"
 
 
 @pytest.fixture

@@ -1,3 +1,5 @@
+from shlex import quote
+
 from flask import jsonify, Blueprint
 from flask import Response
 
@@ -21,7 +23,7 @@ async def get_document(name):
             status=200,
             mimetype='application/pdf'
         )
-        response.headers['Content-Disposition'] = 'inline; filename="%s"' % name
+        response.headers['Content-Disposition'] =  'inline; filename="{name}"; filename*=UTF-8'
         return response
     except Exception as e:
         return jsonify({"error": str(e)}), 500
