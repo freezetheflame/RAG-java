@@ -1,4 +1,6 @@
-from flask import Blueprint, request, jsonify
+import asyncio
+
+from flask import Blueprint, request, jsonify, Response
 
 from app.services.rag import RAGService
 
@@ -59,3 +61,30 @@ async def hybrid_search():
     except Exception as e:
         # 捕获异常并返回错误信息
         return jsonify({"error": str(e)}), 500
+
+@bp.route('/stream_output',methods=['POST'])
+def stream_output():
+    #build a server sent event
+    data = request.get_json()
+    query = data.get("query")
+    top_k = data.get("top_k", 5)# 默认检索前 5 条结果
+    model = data.get("model","hunyuan")
+
+    if not query:
+        return jsonify({"error": "Missing 'query' in request body"}), 400
+    if model not in ["hunyuan", "deepseek"]:
+        model = "hunyuan"
+        # 2. 初始化 RAG 服务
+    rag_service = RAGService(LLMrequire=model)
+    # 定义生成器函数
+    def generate():
+        try:
+            # 调用 RAGService 的流式生成方法
+            for chunk in rag_service.stream_output(query,top_k=top_k):
+                yield f"data: {chunk}\n\n"
+            yield "data: [END]\n\n"
+        except Exception as e:
+            print(f"Error during streaming: {e}")
+            yield "data: [END]\n\n"
+
+    return Response(generate(), mimetype="text/event-stream")

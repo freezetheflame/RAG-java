@@ -39,7 +39,7 @@ class MilvusClient:
 
     def search(self, query_vector, top_k=5):
         search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
-        print(f"query_vector: {query_vector}")
+        print(f"query_vector embedding done")
         results = self.collection.search(
             data=[query_vector],
             anns_field="embedding",
