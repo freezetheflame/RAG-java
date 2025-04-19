@@ -5,3 +5,4 @@ data/data
 app/hfmodels
 data/crawlers/data
 .venv/
+data/source/.

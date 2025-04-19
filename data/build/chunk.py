@@ -1,7 +1,9 @@
+import os
+
 from unstructured.partition.pdf import partition_pdf
 from unstructured.partition.md import partition_md
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
+from PyPDF2 import PdfReader
 
 class AdvancedChunker(RecursiveCharacterTextSplitter):
     def __init__(self):
@@ -62,25 +64,44 @@ class AdvancedChunker(RecursiveCharacterTextSplitter):
 
         return processed
 
-
-
     def process_pdf(self, file_path):
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"文件 {file_path} 不存在")
         # 使用Unstructured提取PDF元素（文本+表格+图片描述）
-            elements = partition_pdf(
-                filename=file_path,
-                strategy="fast",  # fast
-                extract_images_in_pdf=False,
-                infer_table_structure=True,
-                include_page_breaks=True,
-            )
-            # 提取纯文本内容
-            text_content = "\n".join([e.text for e in elements if hasattr(e, 'text')])
+        print(f"开始处理PDF文件: {file_path}")
+        elements = partition_pdf(
+            filename=file_path,
+            strategy="fast",  # fast
+            extract_images_in_pdf=False,
+            infer_table_structure=True,
+            include_page_breaks=True,
+        )
+        is_un = True
+        if elements.__len__() == 0:
+            print("using other method to extract pdf")
+            # 处理PDF文件
 
-            # 分块处理
-            chunks = self.split_text(text_content)
-            if chunks.__len__() == 0:
-                raise ValueError("分块失败，请检查PDF内容")
-            return chunks
+            reader = PdfReader(file_path)
+            elements = []
+            is_un = False
+            # 按照text属性提取文本
+            for page in reader.pages:
+                text = page.extract_text()
+                if text:
+                    elements.append(text)
+
+        # 提取纯文本内容
+        if is_un:
+            text_content = "\n".join([e.text for e in elements if hasattr(e, 'text')])
+        else:
+            text_content = "\n".join(elements)
+        if text_content.__len__() == 0:
+            raise ValueError("PDF内容为空，请检查PDF文件")
+        # 分块处理
+        chunks = self.split_text(text_content)
+        if chunks.__len__() == 0:
+            raise ValueError("分块失败，请检查PDF内容")
+        return chunks
 
     # chunk.py 更新后的 process_markdown 方法
     def process_markdown(self, file_path):
