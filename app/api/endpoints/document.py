@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 from flask import jsonify, Blueprint
 from flask import Response
 
@@ -19,9 +21,9 @@ async def get_document(name):
         response = Response(
             file_url,
             status=200,
-            mimetype='application/pdf'
+            content_type='application/pdf',
+            headers={'Content-Disposition': f"inline; filename*=UTF-8''{quote(name)}"}
         )
-        response.headers['Content-Disposition'] = 'inline; filename="%s"' % name
         return response
     except Exception as e:
         return jsonify({"error": str(e)}), 500

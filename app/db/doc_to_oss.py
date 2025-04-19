@@ -2,6 +2,7 @@ import os
 
 import oss2
 from app.config import Settings
+from urllib.parse import quote
 
 
 class DocToOSS:
@@ -15,12 +16,11 @@ class DocToOSS:
     def get_file(self, file_name):
             auth = oss2.Auth(self.ACCESS_KEY_ID, self.ACCESS_KEY_SECRET)
             bucket = oss2.Bucket(auth, self.ENDPOINT_URL, self.bucket_name)
-            file_path =  file_name
 
             # 设置过期时间
             expiry_seconds = 3600
 
-            url = bucket.sign_url('GET', file_path, expiry_seconds)
+            url = bucket.sign_url('GET', file_name, expiry_seconds)
             return url
 
     def upload_file(self,file_path):
@@ -32,5 +32,5 @@ class DocToOSS:
 
 if __name__ == '__main__':
     doc_to_oss = DocToOSS()
-    url = doc_to_oss.get_file('Bug.pdf')
+    url = doc_to_oss.get_file('ComputerArchitecture.pdf')
     print(url)

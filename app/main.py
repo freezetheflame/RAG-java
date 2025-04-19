@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 from app.api.endpoints import chat, search, document
 from app.config import Settings
@@ -18,6 +19,7 @@ def create_app():
     app.register_blueprint(document.bp)
     milvus_client.connect(app)
     set_env()
+    CORS(app, supports_credentials=True)
     return app
 
 def set_env():
