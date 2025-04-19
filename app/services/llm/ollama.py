@@ -2,7 +2,8 @@ import asyncio
 import os
 
 from openai import AsyncOpenAI
-
+from langsmith.wrappers import wrap_openai
+from langsmith import traceable
 from app.config import Settings
 from app.services.llm import LLMService
 
@@ -17,6 +18,7 @@ class OllamaService(LLMService):
         # 同步方法调用异步方法
         return asyncio.run(self.agenerate(prompt, **kwargs))
 
+    @traceable
     async def agenerate(self, prompt: str, **kwargs) -> str:
         response = await self.client.chat.completions.create(
             model = 'llama3.1:latest',

@@ -10,13 +10,15 @@ async def search():
         # 1. 解析请求数据
         data = request.get_json()
         query = data.get("query")
-        top_k = data.get("top_k", 5)  # 默认检索前 5 条结果
+        top_k = data.get("top_k", 5)
+        model = data.get("model","hunyuan")# 默认检索前 5 条结果
 
         if not query:
             return jsonify({"error": "Missing 'query' in request body"}), 400
-
+        if model not in ["hunyuan", "deepseek"]:
+            model = "hunyuan"
         # 2. 初始化 RAG 服务
-        rag_service = RAGService(LLMrequire='hunyuan')
+        rag_service = RAGService(LLMrequire=model)
 
         # 3. 执行 RAG 查询
         result = await rag_service.query(query, top_k=top_k)

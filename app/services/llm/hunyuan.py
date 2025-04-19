@@ -1,5 +1,8 @@
 import asyncio
 import os
+from langsmith.wrappers import wrap_openai
+from langsmith import traceable
+
 
 from openai import AsyncOpenAI
 
@@ -11,12 +14,13 @@ API_URL = 'https://api.hunyuan.cloud.tencent.com/v1'
 class hunyuanService(LLMService):
     def __init__(self):
         self.api_key = Settings.HUNYUAN_API_KEY
-        self.client = AsyncOpenAI(api_key=self.api_key,base_url=API_URL)
+        self.client = wrap_openai(AsyncOpenAI(api_key=self.api_key,base_url=API_URL))
 
     def generate(self, prompt: str, **kwargs) -> str:
         # 同步方法调用异步方法
         return asyncio.run(self.agenerate(prompt, **kwargs))
 
+    @traceable
     async def agenerate(self, prompt: str, **kwargs) -> str:
         print("---------llm is generating response--------")
         response = await self.client.chat.completions.create(

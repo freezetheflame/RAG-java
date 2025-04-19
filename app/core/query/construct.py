@@ -14,10 +14,10 @@ class QueryPipeline:
         intent_constructor = self.query_factory.get_constructor("entity")
         query_context = intent_constructor.build(user_query)
 
-        # 2. Translation (示例：中文→英文)
-        if lang != "en":
-            translated_query = self.translator.translate(user_query)
-            query_context["translated_query"] = translated_query
+        # # 2. Translation (示例：中文→英文)
+        # if lang != "en":
+        #     translated_query = self.translator.translate(user_query)
+        #     query_context["translated_query"] = translated_query
 
         # 3. Routing
         router = self.router_strategy.select_router(query_context["intent"])
