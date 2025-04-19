@@ -4,10 +4,10 @@ from data.build.pipeline import ProcessingPipeline
 
 def main():
     pipeline = ProcessingPipeline()
-    file_path = "./source/Java程序员面试宝典.pdf"
+    file_path = "data/面试题.pdf"
     pipeline.process_document(file_path)
-    # ossLoader = DocToOSS()
-    # ossLoader.upload_file(file_path)
+    ossloader = DocToOSS()
+    ossloader.upload_file(file_path)
     print("successful")
 
 
