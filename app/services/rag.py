@@ -18,7 +18,7 @@ class RAGService:
 
         # 2. 在 Milvus 中检索
         results = self.milvus_client.search(query_vector=query_vector, top_k=top_k)
-        print("----------retrieve results:",results)
+        print("----------retrieve files done------------------")
         # 3. 解析结果
         retrieved_docs = []
         for hit in results[0]:
@@ -83,3 +83,12 @@ class RAGService:
 
     async def hybrid_search(self, query: str, top_k=5, keywords: list = None):
         pass
+
+
+    def stream_output(self, query: str, top_k=5):
+        # 1. 检索相关文档
+        retrieved_docs = self.retrieve(query, top_k=top_k)
+
+        for chunk in self.llm_service.stream_generate(prompt=query,retrieved_docs=retrieved_docs):
+            yield chunk
+

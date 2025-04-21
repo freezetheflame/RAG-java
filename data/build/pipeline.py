@@ -15,6 +15,7 @@ class ProcessingPipeline:
         self.VectorDB = VectorDB(milvus_uri=Settings.MILVUS_URL,token=Settings.MILVUS_TOKEN)
         self.embedding = EmbeddingGenerator(model_name='BAAI/bge-small-zh-v1.5')
 
+
     def process_file_path(self,file_path:str)->str:
         #extract name out of path
         file_name = os.path.basename(file_path)

@@ -1,5 +1,4 @@
 from unstructured.partition.pdf import partition_pdf
-from unstructured.partition.md import partition_md
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 

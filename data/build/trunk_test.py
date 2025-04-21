@@ -32,7 +32,7 @@ def validate_chunk(chunk):
 
 @pytest.fixture
 def sample_pdf():
-    return "../data/分布式面试资料.pdf"
+    return "../data/JVM.pdf"
 
 
 @pytest.fixture
