@@ -69,7 +69,7 @@ def stream_output():
     query = data.get("query")
     top_k = data.get("top_k", 5)# 默认检索前 5 条结果
     model = data.get("model","hunyuan")
-
+    print("query:",query)
     if not query:
         return jsonify({"error": "Missing 'query' in request body"}), 400
     if model not in ["hunyuan", "deepseek"]:
@@ -79,12 +79,24 @@ def stream_output():
     # 定义生成器函数
     def generate():
         try:
-            # 调用 RAGService 的流式生成方法
-            for chunk in rag_service.stream_output(query,top_k=top_k):
-                yield f"data: {chunk}\n\n"
+            # 流式输出文档和生成内容
+            for packet in rag_service.stream_output(query, top_k=top_k):
+                if packet.startswith("__DOCS_START__"):
+                    # 文档数据包
+                    yield packet
+                else:
+                    # 生成内容数据包
+                    yield f"data: {packet}\n\n"
             yield "data: [END]\n\n"
         except Exception as e:
             print(f"Error during streaming: {e}")
-            yield "data: [END]\n\n"
+            yield "data: [ERROR]\n\n"
 
-    return Response(generate(), mimetype="text/event-stream")
+    return Response(
+        generate(),
+        mimetype="text/event-stream",
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+        }
+    )

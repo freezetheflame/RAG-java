@@ -1,3 +1,6 @@
+import json
+import time
+
 from flask import current_app
 
 from app.api.dependency import get_llm_service_dependency
@@ -13,6 +16,7 @@ class RAGService:
         self.llm_service = get_llm_service_dependency(LLMrequire)  # 初始化 LLM 服务
 
     def retrieve(self, query: str, top_k=5):
+        print("--------------encoding------------")
         # 1. 文本向量化
         query_vector = self.tokenizer.encode(query)
 
@@ -88,7 +92,31 @@ class RAGService:
     def stream_output(self, query: str, top_k=5):
         # 1. 检索相关文档
         retrieved_docs = self.retrieve(query, top_k=top_k)
+        #2. 返回文档
+        doc_payload = {
+            "type": "docs",
+            "data": [
+                {
+                    "id": doc.get("id"),
+                    "title": getattr(doc, "title", "Untitled"),
+                    "source": getattr(doc, "source", ""),
+                    "score": doc.get("score"),
+                }
+                for doc in retrieved_docs
+            ]
+        }
+        yield f"__DOCS_START__{json.dumps(doc_payload)}__DOCS_END__\n\n"
 
-        for chunk in self.llm_service.stream_generate(prompt=query,retrieved_docs=retrieved_docs):
-            yield chunk
+        # 3. 流式生成内容
+        for chunk in self.llm_service.stream_generate(
+                prompt=query,
+                retrieved_docs=retrieved_docs
+        ):
+            # 内容数据包
+            content_payload = {
+                "type": "content",
+                "data": chunk,
+                "timestamp": time.time()
+            }
+            yield json.dumps(content_payload)
 
