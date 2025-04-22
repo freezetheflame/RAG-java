@@ -98,14 +98,14 @@ class RAGService:
             "data": [
                 {
                     "id": doc.get("id"),
-                    "title": getattr(doc, "title", "Untitled"),
-                    "source": getattr(doc, "source", ""),
+                    "title": doc.get("name"),
+                    "content": doc.get("content"),
                     "score": doc.get("score"),
                 }
                 for doc in retrieved_docs
             ]
         }
-        yield f"__DOCS_START__{json.dumps(doc_payload)}__DOCS_END__\n\n"
+        yield json.dumps(doc_payload)
 
         # 3. 流式生成内容
         for chunk in self.llm_service.stream_generate(

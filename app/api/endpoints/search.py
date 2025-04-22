@@ -76,17 +76,13 @@ def stream_output():
         model = "hunyuan"
         # 2. 初始化 RAG 服务
     rag_service = RAGService(LLMrequire=model)
+    print("service:",rag_service)
     # 定义生成器函数
     def generate():
         try:
             # 流式输出文档和生成内容
             for packet in rag_service.stream_output(query, top_k=top_k):
-                if packet.startswith("__DOCS_START__"):
-                    # 文档数据包
-                    yield packet
-                else:
-                    # 生成内容数据包
-                    yield f"data: {packet}\n\n"
+                yield f"data: {packet}\n\n"
             yield "data: [END]\n\n"
         except Exception as e:
             print(f"Error during streaming: {e}")
