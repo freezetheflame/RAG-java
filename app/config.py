@@ -22,3 +22,6 @@ class Settings:
     LANGSMITH_PROJECT = config('LANGSMITH_PROJECT')
     LANGSMITH_API_KEY = config('LANGSMITH_API_KEY')
     LANGSMITH_ENDPOINT = config('LANGSMITH_ENDPOINT')
+    Aliyun_AK_ID = config('Aliyun_AK_ID')
+    Aliyun_AK_SECRET = config('Aliyun_AK_SECRET')
+    Aliyun_APP_KEY = config('Aliyun_APP_KEY')
