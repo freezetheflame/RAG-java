@@ -9,3 +9,6 @@ data/source/
 .idea/misc.xml
 .idea/vcs.xml
 .idea/
+venv/
+**/__pycache__/
+.vscode/
