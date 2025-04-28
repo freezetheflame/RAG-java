@@ -40,6 +40,9 @@ jobs:
         LANGSMITH_ENDPOINT = ${{secrets.LANGSMITH_ENDPOINT}}
         LANGSMITH_API_KEY = ${{secrets.LANGSMITH_API_KEY}}
         LANGSMITH_PROJECT = ${{secrets.LANGSMITH_PROJECT}}
+        Aliyun_APP_KEY = ${{secrets.Aliyun_APP_KEY}}
+        Aliyun_AK_SECRET = ${{secrets.Aliyun_AK_SECRET}}
+        Aliyun_AK_ID = ${{secrets.Aliyun_AK_ID}}
         EOF
 
     - name: Install dependencies
