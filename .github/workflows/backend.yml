@@ -43,6 +43,9 @@ jobs:
         Aliyun_APP_KEY = ${{secrets.Aliyun_APP_KEY}}
         Aliyun_AK_SECRET = ${{secrets.Aliyun_AK_SECRET}}
         Aliyun_AK_ID = ${{secrets.Aliyun_AK_ID}}
+        NEO4J_URI = ${{secrets.NEO4J_URI}}
+        NEO4J_USERNAME = ${{secrets.NEO4J_USERNAME}}
+        NEO4J_PASSWORD = ${{secrets.NEO4J_PASSWORD}}
         EOF
 
     - name: Install dependencies
