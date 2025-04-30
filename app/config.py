@@ -25,3 +25,6 @@ class Settings:
     Aliyun_AK_ID = config('Aliyun_AK_ID')
     Aliyun_AK_SECRET = config('Aliyun_AK_SECRET')
     Aliyun_APP_KEY = config('Aliyun_APP_KEY')
+    NEO4J_URI = config('NEO4J_URI')
+    NEO4J_USERNAME = config('NEO4J_USERNAME')
+    NEO4J_PASSWORD = config('NEO4J_PASSWORD')

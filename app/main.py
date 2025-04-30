@@ -4,6 +4,7 @@ from flask_cors import CORS
 from app.api.endpoints import chat, search, document
 from app.config import Settings
 from app.db.milvus_client import milvus_client
+from app.db.neo4j_client import neo4j_client
 
 app = Flask(__name__)
 
@@ -18,6 +19,7 @@ def create_app():
     app.register_blueprint(search.bp)
     app.register_blueprint(document.bp)
     milvus_client.connect(app)
+    neo4j_client.connect(app)
     set_env()
     CORS(app, supports_credentials=True)
     return app
