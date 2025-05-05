@@ -1,18 +1,20 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 LABEL authors="lhy"
 
 # 设置工作目录
-WORKDIR /app
+WORKDIR /app 
 
 # 安装依赖
+COPY  requirements.txt . 
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir flask[async]
+RUN pip install --no-cache-dir -U huggingface_hub
+ENV HF_ENDPOINT=https://hf-mirror.com
 
 # 复制应用代码
-COPY app/ .
+COPY . .
 
-# 设置Flask 环境变量
-ENV FLASK_APP=main.py
-ENV FLASK_ENV=production
 
 # 启动命令
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "main:create_app()"]
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5000"]

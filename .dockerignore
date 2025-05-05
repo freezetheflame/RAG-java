@@ -1,0 +1,8 @@
+.idea/
+.vscode/
+.github/
+data/
+test/
+venv/
+example.png
+README.md

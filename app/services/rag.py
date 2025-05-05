@@ -1,3 +1,6 @@
+import json
+import time
+
 from flask import current_app
 
 from app.api.dependency import get_llm_service_dependency
@@ -13,12 +16,13 @@ class RAGService:
         self.llm_service = get_llm_service_dependency(LLMrequire)  # 初始化 LLM 服务
 
     def retrieve(self, query: str, top_k=5):
+        print("--------------encoding------------")
         # 1. 文本向量化
         query_vector = self.tokenizer.encode(query)
 
         # 2. 在 Milvus 中检索
         results = self.milvus_client.search(query_vector=query_vector, top_k=top_k)
-        print("----------retrieve results:",results)
+        print("----------retrieve files done------------------")
         # 3. 解析结果
         retrieved_docs = []
         for hit in results[0]:
@@ -83,3 +87,36 @@ class RAGService:
 
     async def hybrid_search(self, query: str, top_k=5, keywords: list = None):
         pass
+
+
+    def stream_output(self, query: str, top_k=5):
+        # 1. 检索相关文档
+        retrieved_docs = self.retrieve(query, top_k=top_k)
+        #2. 返回文档
+        doc_payload = {
+            "type": "docs",
+            "data": [
+                {
+                    "id": doc.get("id"),
+                    "title": doc.get("name"),
+                    "content": doc.get("content"),
+                    "score": doc.get("score"),
+                }
+                for doc in retrieved_docs
+            ]
+        }
+        yield json.dumps(doc_payload)
+
+        # 3. 流式生成内容
+        for chunk in self.llm_service.stream_generate(
+                prompt=query,
+                retrieved_docs=retrieved_docs
+        ):
+            # 内容数据包
+            content_payload = {
+                "type": "content",
+                "data": chunk,
+                "timestamp": time.time()
+            }
+            yield json.dumps(content_payload)
+

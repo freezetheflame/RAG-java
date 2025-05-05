@@ -25,7 +25,7 @@ class MilvusClient:
             connections.connect(uri=self.uri, token=self.token)
             self.collection = Collection(self.collection_name)
             self.collection.load()
-            print(f"ℹ️ Milvus连接成功:{self.uri}:{self.token}")
+            print(f"ℹ️ Milvus连接成功")
             _app.extensions['milvus'] = self  # 存入扩展系统
             # print(f"Connected to Milvus at {self.host}:{self.port}:{self.db_name}")
         except Exception as e:
@@ -39,7 +39,7 @@ class MilvusClient:
 
     def search(self, query_vector, top_k=5):
         search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
-        print(f"query_vector: {query_vector}")
+        print(f"query_vector embedding done")
         results = self.collection.search(
             data=[query_vector],
             anns_field="embedding",
