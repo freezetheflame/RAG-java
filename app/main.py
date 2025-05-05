@@ -1,10 +1,14 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import migrate
 
 from app.api.endpoints import chat, search, document
 from app.db.milvus_client import milvus_client
 
 app = Flask(__name__)
+db = SQLAlchemy()
+
 
 @app.route('/')
 def home():
@@ -13,6 +17,8 @@ def home():
 
 
 def create_app():
+    db.init_app(app)
+    migrate.init_app(app, db)
     app.register_blueprint(chat.bp)
     app.register_blueprint(search.bp)
     app.register_blueprint(document.bp)
