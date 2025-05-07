@@ -13,7 +13,7 @@ env:
 
 jobs:
   service-validation:
-    runs-on: [self-hosted, nju]
+    runs-on: [self-hosted]
 
     steps:
     - name: Checkout code
