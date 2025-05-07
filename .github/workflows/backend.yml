@@ -13,7 +13,7 @@ env:
 
 jobs:
   service-validation:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, nju]
 
     steps:
     - name: Checkout code
@@ -40,6 +40,8 @@ jobs:
         LANGSMITH_ENDPOINT = ${{secrets.LANGSMITH_ENDPOINT}}
         LANGSMITH_API_KEY = ${{secrets.LANGSMITH_API_KEY}}
         LANGSMITH_PROJECT = ${{secrets.LANGSMITH_PROJECT}}
+        DATABASE_URI = ${{secrets.DATABASE_URI}}
+        SECRET_KEY = ${{secrets.SECRET_KEY}}
         Aliyun_APP_KEY = ${{secrets.Aliyun_APP_KEY}}
         Aliyun_AK_SECRET = ${{secrets.Aliyun_AK_SECRET}}
         Aliyun_AK_ID = ${{secrets.Aliyun_AK_ID}}

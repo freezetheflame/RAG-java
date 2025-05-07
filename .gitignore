@@ -3,7 +3,6 @@ tutorial/
 data/data
 app/hfmodels
 data/crawlers/data
-.venv/
 data/source
 .idea/RAGjava.iml
 .idea/misc.xml
