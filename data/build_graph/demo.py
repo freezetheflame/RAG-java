@@ -1,6 +1,8 @@
 from app.db.neo4j_client import Neo4jClient
 from typing import Dict, List
 
+# TODO: extend the use of neo4j
+# blame: CHY
 class GraphDemo:
     def __init__(self):
         self.neo4j_client = Neo4jClient()

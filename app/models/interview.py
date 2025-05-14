@@ -1,13 +1,17 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Table
 from app.extensions import db
 
-class Interview(db.Base):
+
+class Interview(db.Model):
     __tablename__ = 'interviews'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)  # 可与用户表关联
-    started_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo('Asia/Shanghai')))
-    ended_at = db.Column(db.DateTime, nullable=True)
-    final_score = db.Column(db.Integer, nullable=True)  # 总分（0~100）
-    feedback = db.Column(db.String(1000), nullable=True)  # AI生成的反馈
+    id = Column(db.Integer, primary_key=True)
+    user_id = Column(db.Integer, nullable=False)  # JWT中的用户ID
+    position = Column(db.String(100))  # 新增面试岗位字段
+    started_at = Column(db.DateTime, default=datetime.now(ZoneInfo('Asia/Shanghai')))
+    ended_at = Column(db.DateTime)
+    final_score = Column(db.Integer)
+    feedback = Column(db.String(1000))
+    llm_provider = Column(db.String(50))  # 使用的LLM提供商

@@ -15,6 +15,10 @@ async def search():
         top_k = data.get("top_k", 5)
         model = data.get("model","hunyuan")# 默认检索前 5 条结果
 
+        # query = Processor.process_query(query)
+        # TODO: 通过优化query提升提问效果
+        # blame： HMY
+
         if not query:
             return jsonify({"error": "Missing 'query' in request body"}), 400
         if model not in ["hunyuan", "deepseek"]:
@@ -38,6 +42,8 @@ async def search():
 @bp.route('/hybrid_search', methods=['POST'])
 async def hybrid_search():
     try:
+        # TODO: 更新完数据库的结构后使用真正的混合检索
+        # blame: LHY
         # 1. 解析请求数据
         data = request.get_json()
         query = data.get("query")
