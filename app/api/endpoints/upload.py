@@ -17,7 +17,15 @@ def upload_new_file():
     if not file.filename.endswith(('.pdf', '.md')):
         return {"error": "Unsupported file type"}, 400
     # 保存文件到指定目录
-    file_path = f"data/{file.filename}"
+    # 构建目标路径（推荐使用绝对路径）
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在目录
+    upload_folder = os.path.join(base_dir, 'data')
+
+    # 如果 data 目录不存在，自动创建
+    os.makedirs(upload_folder, exist_ok=True)
+
+    # 构建完整文件路径
+    file_path = os.path.join(upload_folder, file.filename)
     file.save(file_path)
     # 处理文件
     pipeline = current_app.extensions['pipeline']

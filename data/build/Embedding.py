@@ -21,10 +21,10 @@ class EmbeddingGenerator:
 
 # 2. Milvus向量数据库操作类
 class VectorDB:
-    def __init__(self, milvus_uri, token,dim=512):
+    def __init__(self, milvus_uri, token,dim=512,collection_name="java_docs"):
         self.milvus_uri = milvus_uri
         self.token = token
-        self.collection_name = "java_docs"
+        self.collection_name = collection_name
         self.dim = dim
 
         # 连接Milvus
