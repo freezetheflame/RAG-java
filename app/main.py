@@ -6,16 +6,22 @@ from flask_migrate import Migrate
 
 from app.api.endpoints import chat, search, document, auth,interview
 from app.config import Settings
+from app.db.doc_to_oss import DocToOSS
 from app.db.milvus_client import milvus_client
 from app.db.neo4j_client import neo4j_client
 from app.extensions import db
 from flask_redis import FlaskRedis
 
+from data.build.pipeline import ProcessingPipeline
+
 app = Flask(__name__)
 
 redis_client = FlaskRedis(app)
 app.extensions['redis'] = redis_client
-
+upload_pipeline = ProcessingPipeline()
+oss_client = DocToOSS()
+app.extensions['oss'] = oss_client
+app.extensions['pipeline'] = upload_pipeline
 
 @app.route('/')
 def home():

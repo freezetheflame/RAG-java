@@ -30,6 +30,14 @@ class DocToOSS:
         print(f"文件 {file_path} 上传成功")
 
 
+    def list_files(self):
+        auth = oss2.Auth(self.ACCESS_KEY_ID, self.ACCESS_KEY_SECRET)
+        bucket = oss2.Bucket(auth, self.ENDPOINT_URL, self.bucket_name)
+        files = []
+        for obj in oss2.ObjectIterator(bucket):
+            files.append(obj.key)
+        return files
+
 if __name__ == '__main__':
     doc_to_oss = DocToOSS()
     url = doc_to_oss.get_file('ComputerArchitecture.pdf')
