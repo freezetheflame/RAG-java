@@ -1,3 +1,4 @@
+import functools
 import hashlib
 import json
 import re
@@ -14,7 +15,7 @@ from langchain_core.prompts import PromptTemplate
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import Settings
-from app.main import  create_app
+from app.main import app
 from app.models.Interview_question import InterviewQuestion
 from app.models.answer import Answer
 from app.models.interview import Interview
@@ -30,12 +31,14 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 
 
 class InterviewSession:
-    def __init__(self, db_session,user_id: int,provider: str = "deepseek", position: str = "高级开发工程师"):
-        self.question_history = None
+    def __init__(self, db_session,user_id: int,provider: str = "deepseek", position: str = "高级开发工程师",first: bool = True):
+        self._history_store = {}
         self.db = db_session
         self.position = position
         self.user_id = user_id
+        self.provider = provider
         self.llm = self._get_llm_by_provider(provider)
+        self.redis = app.extensions['redis']
 
         #创造面试主记录
         self.interview = Interview(
@@ -44,21 +47,14 @@ class InterviewSession:
             llm_provider=provider,
             started_at=datetime.now(ZoneInfo('Asia/Shanghai'))
         )
-        self.db.add(self.interview)
-        self.db.commit()
+        if(first):
+            self.db.add(self.interview)
+            self.db.commit()
 
         # 配置LangChain
         self.memory = ConversationBufferMemory(
             return_messages=True
         )
-
-        # self.prompt_template = PromptTemplate.from_template(self._create_prompt_template()),
-        # self.chain = ConversationChain(
-        #     llm=self.llm,
-        #     memory=self.memory,
-        #     prompt=self.prompt_template,
-        #     verbose=True
-        # )
         self.session_id = f"interview_{self.interview.id}"
         self.runnable = self._build_chain()
 
@@ -75,6 +71,7 @@ class InterviewSession:
                             2. 提出下一个问题
                             3. 判断是否需要追问
                             4. 如果问题数目到了15个，请结束这次面试，并且给予被面试者一个总结性的评价
+                            5. 以下会有你的历史对话记录，请根据上下文进行回答
         
                             返回JSON格式：
                             {{{{"evaluation": "...","next_question": "...","need_followup": bool,"need_end": bool}}}}'''
@@ -107,18 +104,123 @@ class InterviewSession:
         # 历史记录管理方法
     def _get_session_history(self, session_id: str) -> ChatMessageHistory:
         """获取当前会话的历史记录"""
-        if not hasattr(self, '_history_store'):
-            self._history_store = {}
 
         if session_id not in self._history_store:
+            # 如果是第一个问题，添加系统提示到历史
             self._history_store[session_id] = ChatMessageHistory()
+            if len(self._history_store[session_id].messages) == 0:
+                self._history_store[session_id].add_ai_message(
+                    f"开始{self.position}职位面试，当前阶段：{self._get_current_stage()}"
+                )
+
         return self._history_store[session_id]
 
-    def _save_answer_to_history(self, answer: str):
-        """将用户回答添加到历史"""
-        history = self._get_session_history(self.session_id)
-        history.add_user_message(answer)
-        history.add_ai_message("")
+    def save_to_redis(self):
+        """将会话历史保存到Redis"""
+        try:
+            # 基本键名, 使用interview ID而不是session_id作为标识更可靠
+            interview_id = self.interview.id
+            base_key = f"interview:{interview_id}"
+            history = self._get_session_history(self.session_id).messages
+            # 1. 保存消息历史 - 将消息序列化为JSON格式
+            messages_data = []
+            for msg in history:
+                messages_data.append({
+                    "type": msg.type,  # 'human' 或 'ai'
+                    "content": msg.content,
+                    "timestamp": datetime.now(ZoneInfo('Asia/Shanghai')).isoformat()
+                })
+
+            history_key = f"{base_key}:history"
+            self.redis.set(
+                history_key,
+                json.dumps(messages_data),
+                ex=86400  # 24小时过期
+            )
+
+            # 2. 保存元数据
+            metadata = {
+                "position": self.position,
+                "user_id": self.user_id,
+                "llm_provider": self.provider,
+                "current_stage": self._get_current_stage(),
+                "question_count": len(self.db.query(InterviewQuestion).filter_by(
+                    interview_id=self.interview.id).all()),
+                "last_updated": datetime.now(ZoneInfo('Asia/Shanghai')).isoformat()
+            }
+
+            metadata_key = f"{base_key}:metadata"
+            self.redis.set(
+                metadata_key,
+                json.dumps(metadata),
+                ex=86400  # 24小时过期
+            )
+
+            # 3. 保存会话ID到用户索引，方便按用户查询
+            user_sessions_key = f"user:{self.user_id}:interviews"
+            self.redis.sadd(user_sessions_key, interview_id)
+            self.redis.expire(user_sessions_key, 604800)  # 7天过期
+
+            return True
+        except Exception as e:
+            print(f"Redis存储失败: {str(e)}")
+            return False
+
+    @classmethod
+    def load_from_redis(cls, db_session, interview_id, redis_client=None):
+        """从Redis加载会话"""
+        try:
+            if redis_client is None:
+                redis_client = app.extensions['redis']
+
+            # 获取面试记录
+            interview = db_session.query(Interview).get(interview_id)
+            if not interview:
+                raise ValueError(f"面试记录 {interview_id} 不存在")
+
+            # 获取元数据
+            metadata_key = f"interview:{interview_id}:metadata"
+            metadata_json = redis_client.get(metadata_key)
+
+            if not metadata_json:
+                raise ValueError(f"Redis中没有找到面试会话 {interview_id} 的元数据")
+
+            metadata = json.loads(metadata_json)
+
+            # 创建会话实例，设置first=False避免创建新面试记录
+            session = cls(
+                db_session=db_session,
+                user_id=metadata["user_id"],
+                provider=metadata.get("llm_provider", "hunyuan"),
+                position=metadata.get("position", "高级开发工程师"),
+                first=False
+            )
+
+            # 设置已有的面试记录
+            session.interview = interview
+            session.session_id = f"interview_{interview_id}"
+
+            # 加载历史记录
+            history_key = f"interview:{interview_id}:history"
+            history_json = redis_client.get(history_key)
+
+            if history_json:
+                messages_data = json.loads(history_json)
+                # 恢复历史记录
+                history = ChatMessageHistory()
+                for msg in messages_data:
+                    if msg["type"] == "human":
+                        history.add_user_message(msg["content"])
+                    elif msg["type"] == "ai":
+                        history.add_ai_message(msg["content"])
+
+                # 将历史记录加载到会话中
+                session._history_store[session.session_id] = history
+
+            return session
+        except Exception as e:
+            print(f"Redis加载失败: {str(e)}")
+            return None
 
 
     def _get_llm_by_provider(self, provider: str):
@@ -127,7 +229,7 @@ class InterviewSession:
             return ChatOpenAI(temperature=0.7, model_name="gpt-3.5-turbo")
         elif provider == "deepseek":
             # 假设使用HuggingFace加载deepseek模型
-            return  ChatOpenAI(openai_api_key=Settings.DEEPSEEK_API_KEY, base_url='https://api.deepseek.com/v1')
+            return  ChatOpenAI(api_key=Settings.DEEPSEEK_API_KEY, base_url='https://api.deepseek.com/v1')
         elif provider == "hunyuan":
             # 为Hunyuan模型创建合适的接口 (如果有特定API)
             # 这里使用ChatOpenAI作为占位符，实际应根据hunyuan API调整
@@ -160,10 +262,23 @@ class InterviewSession:
             }}
             """
 
-    async def generate_question(self, answer: Optional[str] =None) -> Dict:
 
-        if self.question_history is None:
-            self.question_history = []
+    async def generate_question(self, answer: Optional[str] =None) -> Dict:
+        history = self._get_session_history(self.session_id).messages
+        print("\n" + "=" * 50)
+        print("当前对话历史:")
+        for msg in history:
+            print(f"{msg.type}: {msg.content}")
+        print("=" * 50 + "\n")
+
+        input_data = {"input": answer or "请提出第一个问题"}
+        print("动态生成的Prompt结构:")
+        print(json.dumps({
+            "system_prompt": f"你正在面试{self.position}职位的候选人，当前阶段：{self._get_current_stage()}...",
+            "history": [{"role": msg.type, "content": msg.content} for msg in history],
+            "human_input": input_data["input"]
+        }, indent=2, ensure_ascii=False))
+        print("\n" + "=" * 50 + "\n")
 
         """生成问题并记录"""
         llm_response = await self.runnable.ainvoke(
@@ -176,11 +291,20 @@ class InterviewSession:
         print("result:", result)
         # 存储问题
         question_record = self._create_question_record(result)
-        self._save_question(question_record)
+        _,_,question_id =  self._save_question(question_record)
+        #存储到历史
+        # self._save_answer_to_history(answer or "请提出第一个问题")
+        # self._save_question_to_history(result["question"])
 
+        print("生成问题后的对话历史:")
+        history = self._get_session_history(self.session_id).messages
+        for msg in history:
+            print(f"{msg.type}: {msg.content}")
+        print("=" * 50 + "\n")
+        self.save_to_redis()
         # 存储回答（如果有）
         if answer:
-            self._save_answer(question_record["id"], answer, result['evaluation'])
+            self._save_answer(question_id, answer, result['evaluation'])
 
         return question_record
 
@@ -206,8 +330,10 @@ class InterviewSession:
             print("raw_response:", raw_response)
             content_str = raw_response.content
             json_match = re.search(r'```json\n(.*?)```', content_str, re.DOTALL)
-            data = json.loads(json_match.group(1).strip())
-
+            if json_match:
+                data = json.loads(json_match.group(1).strip())
+            else:
+                data = json.loads(content_str)
             return {
                 "question": data["next_question"],
                 "evaluation": data["evaluation"],
@@ -305,7 +431,7 @@ class InterviewSession:
 
         return category, difficulty
 
-    def _save_question(self, question_data: dict) -> tuple[Question, InterviewQuestion]:
+    def _save_question(self, question_data: dict) -> tuple[Question, InterviewQuestion,int]:
         """
         保存问题到数据库，返回(Question, InterviewQuestion)记录
         """
@@ -339,7 +465,7 @@ class InterviewSession:
         self.db.add(interview_question)
         self.db.commit()
 
-        return question, interview_question
+        return question, interview_question,question.id
 
     def _save_answer(self,
                      interview_question_id: int,
@@ -397,6 +523,7 @@ from sqlalchemy.orm import sessionmaker
 
 
 async def async_test_generate():
+    from app.main import create_app
     app = create_app()
 
     with app.app_context():

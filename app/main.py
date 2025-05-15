@@ -4,13 +4,18 @@ from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 
-from app.api.endpoints import chat, search, document, auth
+from app.api.endpoints import chat, search, document, auth,interview
 from app.config import Settings
 from app.db.milvus_client import milvus_client
 from app.db.neo4j_client import neo4j_client
 from app.extensions import db
+from flask_redis import FlaskRedis
 
 app = Flask(__name__)
+
+redis_client = FlaskRedis(app)
+app.extensions['redis'] = redis_client
+
 
 @app.route('/')
 def home():
@@ -23,11 +28,12 @@ def create_app():
 
     db.init_app(app)
     Migrate(app, db)
-
+    app.config['REDIS_URL'] = 'redis://localhost:6379/0'  # 默认本地Redis，数据库0
     app.register_blueprint(chat.bp)
     app.register_blueprint(search.bp)
     app.register_blueprint(document.bp)
     app.register_blueprint(auth.bp)
+    app.register_blueprint(interview.interview_bp)
     milvus_client.connect(app)
     neo4j_client.connect(app)
     CORS(app, supports_credentials=True)
