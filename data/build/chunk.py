@@ -62,6 +62,7 @@ class AdvancedChunker(RecursiveCharacterTextSplitter):
         return processed
 
 
+    # TODO: 优化chunk方法
 
     def process_pdf(self, file_path):
         # 使用Unstructured提取PDF元素（文本+表格+图片描述）

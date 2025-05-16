@@ -2,7 +2,8 @@ from neo4j import GraphDatabase
 
 from app.config import Settings
 
-
+# TODO: extend the use of neo4j
+# blame: CHY
 class Neo4jClient:
     def __init__(self):
         self.uri = Settings.NEO4J_URI

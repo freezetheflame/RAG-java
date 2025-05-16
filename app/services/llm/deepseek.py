@@ -24,6 +24,9 @@ class DeepseekService(LLMService):
         prompt = query
         if retrieved_docs:
             context = "\n".join([doc["content"] for doc in retrieved_docs])
+            # 关于prompt的处理
+            # TODO: 根据实际需求调整prompt的格式
+            # blame: HMY 注意这里代码格式的设计，要在几个工厂方法中都完成这样的选择设计
             prompt = f"""
             根据以下上下文回答问题：
             上下文：
