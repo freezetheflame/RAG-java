@@ -1,6 +1,4 @@
 import os
-import sys
-from concurrent.futures import ProcessPoolExecutor
 
 from app.config import Settings
 from data.build.Embedding import VectorDB, EmbeddingGenerator

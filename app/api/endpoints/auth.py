@@ -1,6 +1,7 @@
-from flask import  Blueprint,  request
+from flask import  Blueprint, request, g
 
 from app.services.auth_service import register_user, login_user, get_user_info
+from app.utils.tokenUtils import token_required
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -15,6 +16,7 @@ async def login():
     return login_user(data)
 
 @bp.route('/info', methods=['GET'])
+@token_required
 async def user_info():
-    data = request.headers.get('Authorization')
-    return get_user_info(data)
+    user = g.user
+    return get_user_info(user)

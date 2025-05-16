@@ -4,7 +4,6 @@ import time
 from flask import current_app
 
 from app.api.dependency import get_llm_service_dependency
-from app.services.llm import LLMService
 from app.utils.tokenizer import Tokenizer
 
 

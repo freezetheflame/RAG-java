@@ -1,4 +1,3 @@
-import uuid
 import datetime
 import jwt
 from zoneinfo import ZoneInfo
@@ -33,7 +32,6 @@ def login_user(data):
     if user and check_password_hash(user.password, password):
         payload = {
             'user_id': user.id,
-            'user_type': user.user_type,
             'exp': datetime.datetime.now(ZoneInfo('Asia/Shanghai')) + datetime.timedelta(minutes=30)
         }
         token = jwt.encode(payload, Settings.SECRET_KEY, algorithm='HS256')
@@ -41,17 +39,5 @@ def login_user(data):
 
     return jsonify({'error': 'Invalid credentials'}), 401
 
-def get_user_info(jwt_token):
-    try:
-        payload = jwt.decode(jwt_token, Settings.SECRET_KEY, algorithms='HS256')
-        user_id = payload.get('user_id')
-        user_type = payload.get('user_type')
-        user = User.query.get(user_id)
-        if user:
-            return jsonify({'user_id': user.id, 'user_type': user_type, 'email': user.email,'user_name': user.username, 'create_time': user.created_at}), 200
-    except jwt.ExpiredSignatureError:
-        return jsonify({'error': 'Expired token'}), 401
-    except jwt.InvalidTokenError:
-        return jsonify({'error': 'Invalid token'}), 401
-
-    return jsonify({'error': 'User not found'}), 404
+def get_user_info(user):
+    return jsonify({'user_id': user.id, 'user_type': user.user_type, 'email': user.email,'user_name': user.username, 'create_time': user.created_at}), 200

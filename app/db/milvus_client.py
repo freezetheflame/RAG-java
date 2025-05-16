@@ -1,4 +1,3 @@
-from pandas.core.interchange.from_dataframe import primitive_column_to_ndarray
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
 
 from app.config import Settings
