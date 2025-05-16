@@ -2,7 +2,6 @@ import os
 
 import oss2
 from app.config import Settings
-from urllib.parse import quote
 
 
 class DocToOSS:
@@ -20,8 +19,7 @@ class DocToOSS:
             # 设置过期时间
             expiry_seconds = 3600
 
-            url = bucket.sign_url('GET', file_name, expiry_seconds)
-            return url
+            return bucket.sign_url('GET', file_name, expiry_seconds)
 
     def upload_file(self,file_path):
         auth = oss2.Auth(self.ACCESS_KEY_ID, self.ACCESS_KEY_SECRET)
@@ -29,6 +27,22 @@ class DocToOSS:
         bucket.put_object_from_file(os.path.basename(file_path), file_path)
         print(f"文件 {file_path} 上传成功")
 
+    def upload_file_to_oss(self, file_stream, filename):
+        auth = oss2.Auth(self.ACCESS_KEY_ID, self.ACCESS_KEY_SECRET)
+        bucket = oss2.Bucket(auth, self.ENDPOINT_URL, self.bucket_name)
+
+        try:
+            if bucket.object_exists(filename):
+                return "文件名已存在"
+
+            result = bucket.put_object(filename, file_stream)
+
+            if result.status == 200:
+                return None
+            else:
+                return "文件上传失败"
+        except Exception as e:
+            return "服务器内部错误"
 
 if __name__ == '__main__':
     doc_to_oss = DocToOSS()
