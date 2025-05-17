@@ -2,14 +2,21 @@ import os
 
 from flask import Blueprint, request, current_app
 
-uploadbp = Blueprint('upload', __name__, url_prefix='/upload')
+from app.utils.tokenUtils import token_required
+from flask import jsonify, g
 
+uploadbp = Blueprint('upload', __name__, url_prefix='/upload')
 
 
 
 # 本文件用于用户自定义文件上传以及管理员查看所有oss上的文件
 @uploadbp.route('/file', methods=['POST'])
+@token_required
 def upload_new_file():
+    user = g.usert
+    if user.user_type != 'Administrator':
+        return jsonify({'error': 'You are not authorized'}), 401
+
     file = request.files.get('file')
     if not file:
         return {"error": "No file provided"}, 400
