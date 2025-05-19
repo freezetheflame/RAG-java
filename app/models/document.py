@@ -19,14 +19,24 @@ class DocumentModel:
             "auto_id": True
         },
         {
-            "name": "embedding",
+            "name": "chunk_embedding",
             "dtype": DataType.FLOAT_VECTOR,
             "dim": 512  # 根据实际模型维度调整
+        },
+        {
+            "name": "summary_embedding",
+            "dtype": DataType.FLOAT_VECTOR,
+            "dim": 512  # 同样使用 BERT 或其他模型
         },
         {
             "name": "content",
             "dtype": DataType.VARCHAR,
             "max_length": 30000
+        },
+        {
+            "name": "summary",
+            "dtype": DataType.VARCHAR,
+            "max_length": 4000  # 用于摘要信息
         },
         {
             "name": "file_name",

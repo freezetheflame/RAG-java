@@ -1,6 +1,9 @@
+import asyncio
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
+
+from langchain_community.chat_models import ChatOpenAI
 
 from app.config import Settings
 from data.build.Embedding import VectorDB, EmbeddingGenerator
@@ -12,9 +15,9 @@ class ProcessingPipeline:
     def __init__(self):
         self.chunker = AdvancedChunker()
         self.tokenizer = ChineseTokenizer()
-        self.VectorDB = VectorDB(milvus_uri=Settings.MILVUS_URL,token=Settings.MILVUS_TOKEN)
+        self.VectorDB = VectorDB(milvus_uri=Settings.MILVUS_URL,token=Settings.MILVUS_TOKEN,collection_name="advanced_java_docs")
         self.embedding = EmbeddingGenerator(model_name='BAAI/bge-small-zh-v1.5')
-
+        self.llm = ChatOpenAI(model_name = "hunyuan-lite",api_key = Settings.HUNYUAN_API_KEY,base_url="https://api.hunyuan.cloud.tencent.com/v1")
 
     def process_file_path(self,file_path:str)->str:
         #extract name out of path
@@ -47,9 +50,19 @@ class ProcessingPipeline:
 
     def _process_chunk(self, chunk):
         """单个分块处理"""
+        # 首先调用ai服务生成summary
+        message = [
+            {"role": "user", "content": f"请为以下内容生成一个简短的总结：\n\n{chunk}"}
+        ]
+        summary = self.llm.invoke(message)
+        summary_str = summary.content
+        print(f"summary: {summary}")
         return {
             "raw_text": chunk,
             # "tokens": self.tokenizer.tokenize(chunk),
-            "vector": self.embedding.generate(chunk),
+            "chunk_vector": self.embedding.generate(chunk),
+            "summary": summary_str,
+            "summary_vector": self.embedding.generate(summary_str),
             "keywords": self.tokenizer.extract_keywords(chunk)
         }
+

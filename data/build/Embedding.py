@@ -18,7 +18,9 @@ class EmbeddingGenerator:
         """批量生成嵌入向量"""
         return self.model.encode(texts, convert_to_tensor=False, device=self.device)
 
-
+    async def agenerate(self, texts):
+        """异步批量生成嵌入向量"""
+        return self.model.encode(texts, convert_to_tensor=False, device=self.device)
 # 2. Milvus向量数据库操作类
 class VectorDB:
     def __init__(self, milvus_uri, token,dim=512,collection_name="java_docs"):
@@ -55,7 +57,11 @@ class VectorDB:
                     "params": {"nlist": 128}
                 }
                 collection.create_index(
-                    field_name="embedding",
+                    field_name="chunk_embedding",
+                    index_params=index_params
+                )
+                collection.create_index(
+                    field_name="summary_embedding",
                     index_params=index_params
                 )
                 print(f"集合 {self.collection_name} 创建成功")
@@ -71,8 +77,10 @@ class VectorDB:
                 "content": doc["raw_text"],
                 "file_name": doc["file_name"],
                 "chunk_index": doc["chunk_index"],
+                "summary": doc["summary"],
+                "summary_embedding": doc["summary_vector"],
                 "keywords": ",".join([kw[0] for kw in doc["keywords"]]),  # 将列表转为字符串
-                "embedding": doc["vector"]
+                "chunk_embedding": doc["chunk_vector"]
             }
             data.append(entity)
 
