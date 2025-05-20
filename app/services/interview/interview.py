@@ -252,6 +252,7 @@ class InterviewSession:
             2. 提出下一个问题
             3. 判断是否需要追问
             4. 如果问题数目到了15个，请结束这次面试，并且给予被面试者一个总结性的评价
+            5. 一个问题不要追问太多，并且请结合用户的简历进行提问
 
             返回JSON格式：
             {{
@@ -503,6 +504,50 @@ class InterviewSession:
             self.db.rollback()
             raise RuntimeError(f"回答存储失败: {str(e)}") from e
 
+    async def generate_final_score_and_feedback(self)->tuple[int, str]:
+        """
+        生成最终评分和反馈
+        :return: (final_score, feedback)
+        """
+        # 根据面试记录生成评分和反馈
+        # 根据历史询问GPT生成评分和反馈
+        history_str = "\n".join(
+            [f"{msg.type}: {msg.content}" for msg in self._get_session_history(self.session_id).messages]
+        )
+        prompt = f"""
+              你已经完成了对于{self.position}职位候选人的面试，以下是你们的对话记录：
+                {history_str}
+                请根据对话记录生成一个最终的评分（1-100分）和反馈总结（限200字），
+                评分和反馈要尽量客观和专业。
+                返回JSON格式：
+                {{{{"final_score": int,"feedback_summary": "...","need_end": bool}}}}"""
+        llm_response = await self.llm.ainvoke(prompt)
+        print("llm_response:", llm_response)
+        # 解析响应
+        try:
+            content_str = llm_response.content
+            json_match = re.search(r'```json\n(.*?)```', content_str, re.DOTALL)
+            if json_match:
+                data = json.loads(json_match.group(1).strip())
+            else:
+                data = json.loads(content_str)
+            final_score = data["final_score"]
+            feedback_summary = data["feedback_summary"]
+        except (json.JSONDecodeError, KeyError) as e:
+            # 失败时使用应急处理
+            final_score = 75
+            feedback_summary = "面试过程顺利，但有些问题需要进一步深入了解。"
+            print(f"解析失败: {str(e)}")
+        # 更新面试记录
+        self.interview.final_score = final_score
+        self.interview.feedback = feedback_summary
+        self.interview.ended_at = datetime.now(ZoneInfo('Asia/Shanghai'))
+        self.db.commit()
+        # 保存到Redis
+        self.save_to_redis()
+        # 返回评分和反馈
+        return final_score, feedback_summary
+
 
 def test_chain_initialization():
     from app.extensions import db
@@ -515,7 +560,6 @@ def test_chain_initialization():
             position="Java工程师",
             provider="hunyuan"
         )
-
 
 import asyncio
 from app.extensions import db

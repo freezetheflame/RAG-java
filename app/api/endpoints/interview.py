@@ -129,14 +129,17 @@ async def submit_answer(interview_id):
         return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-@interview_bp.route('/<int:interview_id>', methods=['PATCH'])
-def end_interview(interview_id):
+@interview_bp.route('/<int:interview_id>', methods=['POST'])
+async def end_interview(interview_id):
     """
     结束面试会话
-    PATCH /api/v1/interviews/123
+    POST /api/v1/interviews/123
     """
     try:
         interview = db.session.get(Interview, interview_id)
+        # 获取面试记录
+        if(interview.final_score is not None and interview.feedback is not None):
+            return jsonify({"error": "Interview already ended"}), HTTPStatus.BAD_REQUEST
         if not interview:
             return jsonify({"error": "Interview not found"}), HTTPStatus.NOT_FOUND
 
@@ -144,8 +147,40 @@ def end_interview(interview_id):
             return jsonify({"error": "Interview already ended"}), HTTPStatus.BAD_REQUEST
         # 结束面试
         interview.ended_at = db.func.now()
+        #生成面试的 final_score 和 feedback
+
+        # 尝试从Redis恢复会话
+        redis_client = current_app.extensions['redis']
+        redis_key = f"interview:{interview_id}"
+
+        # 检查Redis中是否存在此会话
+        if redis_client.exists(f"{redis_key}:metadata"):
+            # 从Redis恢复会话
+            interview_session = InterviewSession.load_from_redis(
+                db_session=db.session,
+                interview_id=interview_id,
+                redis_client=redis_client
+            )
+
+            if not interview_session:
+                #报错
+                raise NoResultFound("Interview session not found in Redis")
+        else:
+            raise NoResultFound("Interview session not found in Redis")
+
+        # 根据interview_session生成 final_score 和 feedback
+        final_score,feedback = await interview_session.generate_final_score_and_feedback()
+
+
+
+
         db.session.commit()
-        return jsonify({"message": "Interview ended successfully"}), HTTPStatus.OK
+
+
+
+        return jsonify({"message": "Interview ended successfully",
+                        "final_score": final_score,
+                        "feed_back": feedback}), HTTPStatus.OK
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
