@@ -7,8 +7,6 @@ from flask import jsonify, g
 
 uploadbp = Blueprint('upload', __name__, url_prefix='/upload')
 
-
-
 # 本文件用于用户自定义文件上传以及管理员查看所有oss上的文件
 @uploadbp.route('/file', methods=['POST'])
 @token_required

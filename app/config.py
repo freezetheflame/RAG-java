@@ -30,3 +30,4 @@ class Settings:
     NEO4J_USERNAME = config('NEO4J_USERNAME')
     NEO4J_PASSWORD = config('NEO4J_PASSWORD')
     SECRET_KEY = config('SECRET_KEY')
+    REDIS_URL = config('REDIS_URL')
