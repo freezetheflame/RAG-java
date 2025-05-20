@@ -21,7 +21,8 @@ def register_user(data):
     new_user = User(username=username, password=hashed_password, email=email, user_type=user_type)
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'Registration successful! id': new_user.id}), 201
+    return jsonify({'msg': 'User registered successfully',
+                    'id': new_user.id}), 200
 
 
 def login_user(data):
