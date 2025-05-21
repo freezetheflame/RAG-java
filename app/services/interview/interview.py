@@ -1,21 +1,16 @@
-import functools
 import hashlib
 import json
 import re
 from datetime import datetime
 from typing import Dict,   Optional
 from zoneinfo import ZoneInfo
-
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
-from langchain_core.prompts import PromptTemplate
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import Settings
-from app.main import app
+from flask import current_app
 from app.models.Interview_question import InterviewQuestion
 from app.models.answer import Answer
 from app.models.interview import Interview
@@ -38,7 +33,7 @@ class InterviewSession:
         self.user_id = user_id
         self.provider = provider
         self.llm = self._get_llm_by_provider(provider)
-        self.redis = app.extensions['redis']
+        self.redis = current_app.extensions['redis']
 
         #创造面试主记录
         self.interview = Interview(
@@ -171,7 +166,7 @@ class InterviewSession:
         """从Redis加载会话"""
         try:
             if redis_client is None:
-                redis_client = app.extensions['redis']
+                redis_client = current_app.extensions['redis']
 
             # 获取面试记录
             interview = db_session.query(Interview).get(interview_id)
