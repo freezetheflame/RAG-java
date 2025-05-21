@@ -4,6 +4,7 @@ from app.extensions import db
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+# 定义问题的具体信息
 class Question(db.Model):
     __tablename__ = 'questions'
     id = Column(db.Integer, primary_key=True)

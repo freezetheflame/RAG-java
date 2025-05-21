@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Table
 from app.extensions import db
 
-
+# 定义面试表，标识面试的场次等基本信息
 class Interview(db.Model):
     __tablename__ = 'interviews'
     id = Column(db.Integer, primary_key=True)

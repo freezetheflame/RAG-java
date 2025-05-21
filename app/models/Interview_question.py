@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo
 
 from app.extensions import db
 
-
+# 定义面试问题表，主要是问题的id
 class InterviewQuestion(db.Model):
     __tablename__ = 'interview_questions'
     id = db.Column(db.Integer, primary_key=True)
