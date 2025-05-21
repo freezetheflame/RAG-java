@@ -6,8 +6,8 @@ import re
 
 MAX_FILE_SIZE = 20 * 1024 * 1024 # 单个文件最大20MB
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'md'} # 允许的文件类型
-doc_to_oss = current_app.extensions['doc_to_oss']
-processed_pipeline = current_app.extensions['processed_pipeline']
+doc_to_oss = current_app.extensions['oss']
+processed_pipeline = current_app.extensions['pipeline']
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
