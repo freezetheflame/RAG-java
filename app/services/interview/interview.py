@@ -247,7 +247,7 @@ class InterviewSession:
             2. 提出下一个问题
             3. 判断是否需要追问
             4. 如果问题数目到了15个，请结束这次面试，并且给予被面试者一个总结性的评价
-            5. 一个问题不要追问太多，并且请结合用户的简历进行提问
+            5. 一个主题的问题不要追问太多，并且请结合用户的简历进行提问
 
             返回JSON格式：
             {{
@@ -461,7 +461,7 @@ class InterviewSession:
         self.db.add(interview_question)
         self.db.commit()
 
-        return question, interview_question,question.id
+        return question, interview_question,interview_question.id
 
     def _save_answer(self,
                      interview_question_id: int,
